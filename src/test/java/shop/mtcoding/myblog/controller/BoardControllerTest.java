@@ -1,10 +1,17 @@
 package shop.mtcoding.myblog.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import shop.mtcoding.myblog.dto.board.BoardReq.BoardSaveReqDto;
+import shop.mtcoding.myblog.dto.board.BoardResp;
+import shop.mtcoding.myblog.dto.board.BoardResp.BoardDetailRespDto;
 import shop.mtcoding.myblog.model.User;
 
 @Transactional // 메서드 실행 직후 무조건 롤백 / 서비스에 트랜잭션과 다름
@@ -47,6 +56,44 @@ public class BoardControllerTest {
 
         mockSession = new MockHttpSession();
         mockSession.setAttribute("principal", user);
+    }
+
+    @Test
+    public void main_test() throws Exception {
+        // given
+
+        // when
+        ResultActions resultActions = mvc.perform(
+                get("/"));
+        Map<String, Object> map = resultActions.andReturn().getModelAndView().getModel();
+        List<BoardResp.BoardMainRespDto> dtos = (List<BoardResp.BoardMainRespDto>) map.get("dtos");
+        String model = om.writeValueAsString(dtos);
+        System.out.println("main_test : " + model);
+        // then
+        resultActions.andExpect(status().isOk());
+        assertThat(dtos.size()).isEqualTo(6);
+        assertThat(dtos.get(0).getUsername()).isEqualTo("ssar");
+        assertThat(dtos.get(0).getTitle()).isEqualTo("제목1 제목1 제목1");
+    }
+
+    @Test
+    public void detail_test() throws Exception {
+        // given
+        int id = 1;
+
+        // when
+        ResultActions resultActions = mvc.perform(
+                get("/board/" + id));
+        Map<String, Object> map = resultActions.andReturn().getModelAndView().getModel();
+        BoardDetailRespDto dto = (BoardDetailRespDto) map.get("dto");
+        String model = om.writeValueAsString(dto);
+        System.out.println("detail_test : " + model);
+
+        // then
+        resultActions.andExpect(status().isOk());
+        assertThat(dto.getUsername()).isEqualTo("ssar");
+        assertThat(dto.getUserId()).isEqualTo(1);
+        assertThat(dto.getTitle()).isEqualTo("제목1 제목1 제목1");
     }
 
     @Test
