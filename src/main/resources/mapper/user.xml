@@ -17,6 +17,10 @@
         select * from user_tb where username = #{username}
     </select>   
 
+    <select id="findByUsernameAndPassword" resultType="shop.mtcoding.myblog.model.User">
+        select * from user_tb where username = #{username} and password = #{password}
+    </select> 
+
     <insert id="insert">
         insert into user_tb (username, password, email, created_at) values(#{username}, #{password}, #{email}, now())
     </insert>    
